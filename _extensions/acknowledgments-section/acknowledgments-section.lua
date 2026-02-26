@@ -1,12 +1,12 @@
 --[[
-abstract-section – move an "abstract" section into document metadata
+acknowledgments-section – move "acknowledgments" into document metadata (Quarto yaml header)
 
-Copyright: © 2017–2023 Albert Krewinkel
+Copyright: © 2026 tockudex
 License:   MIT – see LICENSE file for details
 ]]
 local stringify = (require 'pandoc.utils').stringify
 local section_identifiers = {
-  abstract = true,
+  acknowledgments = true,
 }
 local collected = {}
 --- The level of the highest heading that was seen so far. Abstracts
@@ -14,8 +14,8 @@ local collected = {}
 --- treated as metadata. Only top-level sections should become metadata.
 local toplevel = 6
 
---- Extract abstract from a list of blocks.
-local function abstract_from_blocklist (blocks)
+--- Extract acknowledgments from a list of blocks.
+local function acknowledgments_from_blocklist (blocks)
   local body_blocks = {}
   local looking_at_section = false
 
@@ -28,13 +28,6 @@ local function abstract_from_blocklist (blocks)
       else
         looking_at_section = false
         body_blocks[#body_blocks + 1] = block
-      end
-    elseif looking_at_section then
-      if block.t == 'HorizontalRule' then
-        looking_at_section = false
-      else
-        local collect = collected[looking_at_section]
-        collect[#collect + 1] = block
       end
     else
       body_blocks[#body_blocks + 1] = block
@@ -49,7 +42,7 @@ Pandoc = function (doc)
 
   -- configure
   section_identifiers_list =
-    (doc.meta['abstract-section'] or {})['section-identifiers']
+    (doc.meta['acknowledgments-section'] or {})['section-identifiers']
   if section_identifiers_list and #section_identifiers_list > 0 then
     section_identifiers = {}
     for i, ident in ipairs(section_identifiers_list) do
@@ -57,28 +50,28 @@ Pandoc = function (doc)
     end
   end
   -- unset config in meta
-  doc.meta['abstract-section'] = nil
+  doc.meta['acknowledgments-section'] = nil
 
   local blocks = {}
   if PANDOC_VERSION >= {2,17} then
     -- Walk all block lists by default
-    blocks = doc.blocks:walk{Blocks = abstract_from_blocklist}
+    blocks = doc.blocks:walk{Blocks = acknowledgments_from_blocklist}
   elseif PANDOC_VERSION >= {2,9,2} then
     -- Do the same with pandoc versions that don't have walk methods but the
     -- `walk_block` function.
     blocks = pandoc.utils.walk_block(
       pandoc.Div(doc.blocks),
-      {Blocks = abstract_from_blocklist}
+      {Blocks = acknowledgments_from_blocklist}
     ).content
   else
     -- otherwise, just check the top-level block-list
-    blocks = abstract_from_blocklist(doc.blocks)
+    blocks = acknowledgments_from_blocklist(doc.blocks)
   end
   for metakey in pairs(section_identifiers) do
     metakey = stringify(metakey)
-    local abstract = collected[metakey]
-    if not meta[metakey] and abstract and #abstract > 0 then
-      meta[metakey] = pandoc.MetaBlocks(abstract)
+    local acknowledgments = collected[metakey]
+    if not meta[metakey] and acknowledgments and #acknowledgments > 0 then
+      meta[metakey] = pandoc.MetaBlocks(acknowledgments)
     end
   end
   return pandoc.Pandoc(blocks, meta)
