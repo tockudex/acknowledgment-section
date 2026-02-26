@@ -1,74 +1,43 @@
-abstract-section
+acknowledgments-section
 ==================================================================
 
-[![GitHub build status][CI badge]][CI workflow]
-
-Filter that ensures that "Abstract" sections are handled as
-expected.
-
-[CI badge]: https://img.shields.io/github/actions/workflow/status/pandoc-ext/abstract-section/ci.yaml?branch=main&logo=github
-[CI workflow]: https://github.com/pandoc-ext/abstract-section/actions/workflows/ci.yaml
+Filter that ensures that "Acknowledgments" sections are handled as expected.
 
 
-Abstract in a dedicated section
+Acknowledgments in a dedicated section
 ------------------------------------------------------------------
 
-This filter allows to write a document abstract as normal sections
-in the main text. It moves any section titled "abstract" from the
-main text into the metadata. Most output format templates expect
-the abstract to be given as part of the metadata, but writing body
-text is easier and more natural.
+This filter allows to write document acknowledgments as normal sections in the main text. It moves any section titled "acknowledgments" from the main text into the metadata. Most output format templates expect the thanks section (acknowledgments) to be given as part of the metadata, but writing body text is easier and more natural. This extension is also written with `typst` in mind and allows for a personalised placement of the acknowledgments section where ever in the paper or report.
 
 ``` markdown
-# Abstract
+# Acknowledgments
 
-Place abstract here.
+Place acknowledgments here.
 
 Multiple paragraphs are possible.
 ```
 
-Without this filter, the abstract would need to be placed in the
-document's metadata. The additional indentation and formatting
-requirements in YAML headers are frequently perceived as confusing
-or annoying, especially when writing longer texts.
+Without this filter, the acknowledgments would need to be placed in the document's metadata. The additional indentation and formatting requirements in YAML headers are frequently perceived as confusing or annoying, especially when writing longer texts.
 
 ``` yaml
 ---
-abstract: |
-  Place abstract here.
+acknowledgments: |
+  Place acknowledgments here.
 
   Multiple paragraphs are possible.
 ---
 ```
 
 
-This filter modifies the document such that the abstract section
-behaves as if it was passed as metadata. It does so by looking for
-a top-level header whose ID is `abstract`. Pandoc auto-creates IDs
-based on header contents, so a header titled *Abstract* will
-satisfy this condition.^[1]
+This filter modifies the document such that the acknowledgments section behaves as if it was passed as metadata. It does so by looking for a top-level header whose ID is `acknowledgments`. Pandoc auto-creates IDs based on header contents, so a header titled *Acknowledgment* will satisfy this condition.^[1]
 
 [1]: This requires the `auto_identifier` extension. It is
      enabled by default.
 
-The abstract can be placed anywhere in the document.
+The Acknowledgments can be placed anywhere in the document.
 
-The filter assumes that the abstract runs up until the next
-heading or [horizontal rule], whichever comes first. Thus the
-abstract can be placed at the beginning of a document whose text
-doesn't start with a heading:
+The filter assumes that the acknowledgments runs up until the next heading.
 
-``` markdown
-# Abstract
-
-The abstract text includes this.
-
-* * * *
-
-This text is the beginning of the document.
-```
-
-[horizontal rule]: https://pandoc.org/MANUAL.html#horizontal-rules
 
 Usage
 ------------------------------------------------------------------
@@ -81,21 +50,20 @@ be used with many publishing systems that are based on pandoc.
 Pass the filter to pandoc via the `--lua-filter` (or `-L`) command
 line option.
 
-    pandoc --lua-filter abstract-section.lua ...
+    pandoc --lua-filter acknowledgments-section.lua ...
 
 ### Quarto
 
 Users of Quarto can install this filter as an extension with
 
-    quarto install extension pandoc-ext/abstract-section
+    quarto install extension tockudex/acknowledgments-section
 
-and use it by adding `abstract-section` to the `filters` entry in
-their YAML header.
+and use it by adding `acknowledgments-section` to the `filters` entry in their YAML header.
 
 ``` yaml
 ---
 filters:
-  - abstract-section
+  - acknowledgments-section
 ---
 ```
 
@@ -109,36 +77,9 @@ for details.
 ---
 output:
   word_document:
-    pandoc_args: ['--lua-filter=abstract-section.lua']
+    pandoc_args: ['--lua-filter=acknowledgments-section.lua']
 ---
 ```
-
-Multiple abstracts
-------------------------------------------------------------------
-
-It is common for certain works to include two abstracts, one in
-English and one in the local language of an academic institution.
-E.g., theses published at many German universities must have a
-German "Zusammenfassung" in addition to the English "Abstract".
-
-The filter can be configured to support those additional
-abstract-like sections as well. The identifiers of the sections
-must be listed in the `section-identifiers` field below the
-`abstract-section` metadata entry. E.g.:
-
-``` yaml
----
-abstract-section:
-  section-identifiers:
-    - abstract
-    - sammanfattning
----
-```
-
-This will place the *Abstract* in the `abstract` variable as
-before, but will also collect the contents of a *Sammanfattning*
-section and place it in the `sammanfattning` field, where it can
-be used for further processing, e.g., with a custom template.
 
 
 License
