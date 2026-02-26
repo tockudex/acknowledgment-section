@@ -1,0 +1,6 @@
+title: acknowledgments-section
+author: tockudex
+version: 0.0.q
+contributes:
+  filters:
+    - acknowledgments-section.lua
